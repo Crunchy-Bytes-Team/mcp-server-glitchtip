@@ -1,0 +1,53 @@
+[project]
+name = "mcp-server-glitchtip"
+version = "1.0.0"
+description = "MCP server enabling LLMs to query issues, stacktraces, and resolve errors in GlitchTip"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "hffmnnj"}
+]
+keywords = [
+    "mcp",
+    "glitchtip",
+    "error-tracking",
+    "sentry",
+    "debugging",
+    "llm",
+    "ai",
+    "claude"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Debuggers",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/hffmnnj/mcp-server-glitchtip"
+Repository = "https://github.com/hffmnnj/mcp-server-glitchtip"
+Issues = "https://github.com/hffmnnj/mcp-server-glitchtip/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+only-include = ["server.py"]
+
+[tool.hatch.build.targets.sdist]
+include = ["server.py", "README.md", "pyproject.toml"]
+
+[project.scripts]
+mcp-server-glitchtip = "server:main"
