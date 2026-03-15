@@ -1,0 +1,18 @@
+# Tests and dev (not needed in image)
+tests/
+.env
+.env.*
+!.env.example
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Docs and tooling (optional; uncomment to shrink image)
+# README.md
+# SECURITY_ANALYSIS.md
+# LICENSE
+# .git/
+# .gitignore

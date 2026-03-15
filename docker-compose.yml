@@ -1,0 +1,17 @@
+# Dev: run the MCP server in a container. Env from .env.
+# Usage:
+#   docker compose up --build   # Streamable HTTP on http://localhost:8000/mcp
+#   docker compose run --rm -e MCP_TRANSPORT=stdio glitchtip-mcp   # stdio for MCP client
+
+services:
+  glitchtip-mcp:
+    build: .
+    image: mcp-server-glitchtip:dev
+    env_file: .env
+    environment:
+      - MCP_TRANSPORT=streamable-http
+      - MCP_HTTP_PORT=8000
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
