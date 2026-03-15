@@ -641,10 +641,11 @@ def main():
         print("Error: GLITCHTIP_PROJECT must contain only letters, numbers, hyphens, and underscores.")
         return
 
-    allowed, ip_msg = check_allowed_ips_from_env()
-    if not allowed:
-        print(f"Error: {ip_msg}")
-        return
+    # Temporarily disabled: IP whitelist fails in Docker (container sees internal IP, not host).
+    # allowed, ip_msg = check_allowed_ips_from_env()
+    # if not allowed:
+    #     print(f"Error: {ip_msg}")
+    #     return
 
     transport = os.environ.get("MCP_TRANSPORT", "stdio").strip().lower()
     host = os.environ.get("MCP_HTTP_HOST", "0.0.0.0").strip()
