@@ -468,14 +468,33 @@ async def fetch_projects(
 async def resolve_issue(
     http_client: httpx.AsyncClient,
     auth_token: str,
-    issue_id: str
+    issue_id: str,
+    organization_slug: str,
+    project_slug: str,
 ) -> str:
-    """Mark an issue as resolved."""
+    """Mark an issue as resolved (project-scoped, then global fallback)."""
+    headers = {"Authorization": f"Bearer {auth_token}"}
     try:
+        if organization_slug and project_slug:
+            response = await http_client.put(
+                f"projects/{organization_slug}/{project_slug}/issues/",
+                params={"id": issue_id},
+                json={"status": "resolved"},
+                headers=headers,
+            )
+            if response.status_code == 401:
+                return "Error: Unauthorized. Check your GLITCHTIP_AUTH_TOKEN."
+            if response.status_code == 404:
+                return f"Error: Project {organization_slug}/{project_slug} or issue {issue_id} not found."
+            if response.status_code < 400:
+                return f"Issue {issue_id} marked as resolved ({organization_slug}/{project_slug})."
+            if response.status_code != 403:
+                response.raise_for_status()
+
         response = await http_client.put(
             f"issues/{issue_id}/",
             json={"status": "resolved"},
-            headers={"Authorization": f"Bearer {auth_token}"}
+            headers=headers,
         )
         if response.status_code == 401:
             return "Error: Unauthorized. Check your GLITCHTIP_AUTH_TOKEN."
@@ -593,14 +612,27 @@ Provides the complete stacktrace, error counts, and timing information.""",
 
     @mcp.tool(
         description="""Mark a GlitchTip issue as resolved after fixing it.
-Use this after you've fixed the bug causing the error.""",
+Use this after you've fixed the bug causing the error.
+Pass organization_slug and project_slug (same as get_glitchtip_issues), or set GLITCHTIP_ORGANIZATION and GLITCHTIP_PROJECT as defaults.""",
     )
-    async def resolve_glitchtip_issue(issue_id: str) -> str:
+    async def resolve_glitchtip_issue(
+        issue_id: str,
+        organization_slug: str | None = None,
+        project_slug: str | None = None,
+    ) -> str:
         if not issue_id:
             return "Error: Missing issue_id argument"
         if not validate_issue_id(issue_id):
             return "Error: issue_id must be a numeric ID."
-        return await resolve_issue(http_client, auth_token, issue_id)
+        org = (organization_slug or _default_org) or ""
+        proj = (project_slug or _default_proj) or ""
+        if not org or not proj:
+            return "Error: organization_slug and project_slug are required (or set GLITCHTIP_ORGANIZATION and GLITCHTIP_PROJECT). Use list_glitchtip_organizations and list_glitchtip_projects to discover values."
+        if not validate_slug(org):
+            return "Error: organization_slug must contain only letters, numbers, hyphens, and underscores."
+        if not validate_slug(proj):
+            return "Error: project_slug must contain only letters, numbers, hyphens, and underscores."
+        return await resolve_issue(http_client, auth_token, issue_id, org, proj)
 
     return mcp
 
